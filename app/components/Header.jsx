@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BsPerson } from "react-icons/bs";
 
 export default function Header() {
   return (
@@ -17,7 +18,7 @@ export default function Header() {
       <nav className="flex gap-6 text-sm">
         <Link href="/new-design" className="hover:border-b">Novo Design</Link>
         <Link href="/gallery" className="hover:border-b">Galeria</Link>
-        <a href="#login-registro" className="hover:border-b">Login/Registro</a>
+        <Link href="/login"><BsPerson size={20} /></Link>
       </nav>
     </header>
   );

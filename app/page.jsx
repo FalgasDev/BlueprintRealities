@@ -13,7 +13,7 @@ export default function Home() {
   const categories = [
     { name: "Moderno", image: "/moderno.png", offset: "mt-20" },
     { name: "Minimalista", image: "/minimalista.png", offset: "" },
-    { name: "Rústico", image: "/rustico.png", offset: "mt-20" },
+    { name: "Rústico", image: "/rustica.png", offset: "mt-20" },
     { name: "Clássico", image: "/classica.png", offset: "" },
   ];
 
@@ -40,17 +40,8 @@ export default function Home() {
     },
   ];
 
-  const images = [
-    "/images/sala.jpg",
-    "/images/cozinha.jpg",
-    "/images/quarto.jpg",
-    "/images/banheiro.jpg",
-  ];
-
   return (
     <>
-      <Header />
-
       <section className="relative w-full h-[600px] mt-15">
         <Image
           src="/home.png"
@@ -84,7 +75,7 @@ export default function Home() {
           {categories.map((cat) => (
             <div
               key={cat.name}
-              className={`relative w-[220px] h-[320px] rounded-xl overflow-hidden shadow-md ${cat.offset}`}
+              className={`relative w-[220px] h-80 rounded-xl overflow-hidden shadow-md ${cat.offset}`}
             >
               <Image
                 src={cat.image}

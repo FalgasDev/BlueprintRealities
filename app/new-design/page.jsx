@@ -1,20 +1,21 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import Link from "next/link"; // Importante para linkar para a galeria se quiser
+import React, { useState, useRef, useEffect } from "react";
+// Utilizando lucide-react para garantir compatibilidade no preview
 import {
-  BsCloudUpload,
-  BsChevronLeft,
-  BsChevronRight,
-  BsImage,
-  BsHeart,
-  BsHeartFill,
-  BsBookmarkPlusFill,
-  BsArrowRepeat,
-  BsXLg,
-  BsCheckCircleFill,
-} from "react-icons/bs";
-import { FaTrash } from "react-icons/fa";
+  Upload,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+  Heart,
+  BookmarkPlus,
+  RotateCcw,
+  X,
+  CheckCircle,
+  Trash2,
+  Loader2,
+  Save,
+} from "lucide-react";
 
 const rooms = [
   { id: "bedroom", label: "Quarto", img: "/quarto.png" },
@@ -41,6 +42,8 @@ const styles = [
 export default function DesignPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+
+  // Estados do Formulário
   const [selectedRoom, setSelectedRoom] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("");
   const [dimensions, setDimensions] = useState({
@@ -50,17 +53,44 @@ export default function DesignPage() {
   });
   const [budget, setBudget] = useState("");
 
+  // Estados de UI/Controle
   const [isGenerating, setIsGenerating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [likedResult, setLikedResult] = useState(false);
-
-  // NOVO: Estado para armazenar a URL da imagem gerada (simulada)
   const [generatedImage, setGeneratedImage] = useState(null);
-  // NOVO: Feedback visual de salvo
-  const [isSaved, setIsSaved] = useState(false);
+
+  // Estados de Salvamento
+  const [isSaved, setIsSaved] = useState(false); // Salvo na Galeria
+  const [isSavedPref, setIsSavedPref] = useState(false); // Salvo nos Cards
 
   const roomScrollRef = useRef(null);
   const styleScrollRef = useRef(null);
+
+  // --- 1. EFEITO: Carregar dados da URL (Quick Fill dos Cards) ---
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+
+      const roomParam = params.get("room");
+      const styleParam = params.get("style");
+      const budgetParam = params.get("budget");
+      const hParam = params.get("h");
+      const wParam = params.get("w");
+      const lParam = params.get("l");
+
+      if (roomParam) setSelectedRoom(roomParam);
+      if (styleParam) setSelectedStyle(styleParam);
+      if (budgetParam && budgetParam !== "undefined") setBudget(budgetParam);
+
+      if (hParam || wParam || lParam) {
+        setDimensions({
+          height: hParam && hParam !== "undefined" ? hParam : "",
+          width: wParam && wParam !== "undefined" ? wParam : "",
+          length: lParam && lParam !== "undefined" ? lParam : "",
+        });
+      }
+    }
+  }, []);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -94,39 +124,40 @@ export default function DesignPage() {
 
     setIsGenerating(true);
 
-    if(selectedRoom == "bedroom") {
-      setGeneratedImage("https://i.imgur.com/46eXHyM.jpg")
-    } else if (selectedRoom == "living") {
-      setGeneratedImage("https://i.imgur.com/GzRHG7g.jpg")
-    } else if (selectedRoom == "kitchen") {
-      setGeneratedImage("https://i.imgur.com/5wEFAJY.jpg")
-    } else if (selectedRoom == "laundry") {
-      setGeneratedImage("https://i.imgur.com/2sVk3tS.jpg")
-    } else if (selectedRoom == "bathroom") {
-      setGeneratedImage("https://i.imgur.com/hlJoX74.jpg")
-    } else if (selectedRoom == "office") {
-      setGeneratedImage("https://i.imgur.com/wIRBB05.jpg")
-    } else if (selectedRoom == "balcony") {
-      setGeneratedImage("https://i.imgur.com/fsnS6JO.jpg")
-    } else {
-      setGeneratedImage("https://i.imgur.com/E1EpeWa.jpg")
-    }
+    // Lógica simulada de imagens (do seu código)
+    let resultImg = "https://i.imgur.com/E1EpeWa.jpg";
+    if (selectedRoom === "bedroom")
+      resultImg = "https://i.imgur.com/46eXHyM.jpg";
+    else if (selectedRoom === "living")
+      resultImg = "https://i.imgur.com/GzRHG7g.jpg";
+    else if (selectedRoom === "kitchen")
+      resultImg = "https://i.imgur.com/5wEFAJY.jpg";
+    else if (selectedRoom === "laundry")
+      resultImg = "https://i.imgur.com/2sVk3tS.jpg";
+    else if (selectedRoom === "bathroom")
+      resultImg = "https://i.imgur.com/hlJoX74.jpg";
+    else if (selectedRoom === "office")
+      resultImg = "https://i.imgur.com/wIRBB05.jpg";
+    else if (selectedRoom === "balcony")
+      resultImg = "https://i.imgur.com/fsnS6JO.jpg";
+
+    setGeneratedImage(resultImg);
 
     setTimeout(() => {
       setIsGenerating(false);
       setIsModalOpen(true);
       setLikedResult(false);
-      setIsSaved(false); // Reseta o status de salvo
+      setIsSaved(false); // Reseta status galeria
+      setIsSavedPref(false); // Reseta status cards
     }, 2000);
   };
 
-  // --- NOVA FUNÇÃO DE SALVAR ---
+  // --- 2. SALVAR NA GALERIA (Imagem) ---
   const handleSaveToGallery = () => {
     if (!generatedImage) return;
 
-    // 1. Cria o objeto do item
     const newItem = {
-      id: Date.now(), // ID único baseado no tempo
+      id: Date.now(),
       image: generatedImage,
       room: rooms.find((r) => r.id === selectedRoom)?.label || "Cômodo",
       style: styles.find((s) => s.id === selectedStyle)?.label || "Estilo",
@@ -134,27 +165,43 @@ export default function DesignPage() {
       liked: likedResult,
     };
 
-    // 2. Pega o array existente ou cria um novo
     const existingGallery = JSON.parse(
       localStorage.getItem("blueprint_gallery") || "[]"
     );
-
-    // 3. Adiciona o novo item
-    const updatedGallery = [newItem, ...existingGallery];
-
-    // 4. Salva de volta no localStorage
-    localStorage.setItem("blueprint_gallery", JSON.stringify(updatedGallery));
-
-    // 5. Feedback visual
+    localStorage.setItem(
+      "blueprint_gallery",
+      JSON.stringify([newItem, ...existingGallery])
+    );
     setIsSaved(true);
-    // alert("Design salvo na sua galeria!"); // Opcional
+  };
+
+  // --- 3. SALVAR PREFERÊNCIAS (Card de Info) ---
+  const handleSavePreferences = () => {
+    const newPref = {
+      id: Date.now(),
+      roomId: selectedRoom,
+      roomLabel:
+        rooms.find((r) => r.id === selectedRoom)?.label || selectedRoom,
+      styleId: selectedStyle,
+      styleLabel:
+        styles.find((s) => s.id === selectedStyle)?.label || selectedStyle,
+      budget: budget,
+      dimensions: dimensions,
+      date: new Date().toLocaleDateString("pt-BR"),
+    };
+
+    const existing = JSON.parse(
+      localStorage.getItem("blueprint_preferences") || "[]"
+    );
+    localStorage.setItem(
+      "blueprint_preferences",
+      JSON.stringify([newPref, ...existing])
+    );
+    setIsSavedPref(true);
   };
 
   const closeModal = () => setIsModalOpen(false);
-
-  const handleRedo = () => {
-    closeModal();
-  };
+  const handleRedo = () => closeModal();
 
   return (
     <div className="flex flex-col lg:flex-row h-[93.5vh] bg-gray-50 font-sans overflow-hidden mt-15 relative">
@@ -170,10 +217,10 @@ export default function DesignPage() {
             />
             <button
               onClick={clearFile}
-              className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
               title="Trocar imagem"
             >
-              <FaTrash size={16} />
+              <Trash2 size={16} />
             </button>
             <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white p-3 text-center text-sm">
               Sua imagem original
@@ -187,7 +234,7 @@ export default function DesignPage() {
               onChange={handleFileChange}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
             />
-            <BsCloudUpload className="w-24 h-24 text-gray-400 group-hover:text-orange-500 transition-colors mb-6" />
+            <Upload className="w-24 h-24 text-gray-400 group-hover:text-orange-500 transition-colors mb-6" />
             <h3 className="text-xl font-bold text-gray-700">
               Arraste sua foto aqui
             </h3>
@@ -215,13 +262,10 @@ export default function DesignPage() {
             {!previewUrl && (
               <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded animate-pulse">
                 <p className="text-orange-700 font-medium flex items-center gap-2">
-                  <BsImage /> Comece fazendo o upload da imagem ao lado.
+                  <ImageIcon /> Comece fazendo o upload da imagem ao lado.
                 </p>
               </div>
             )}
-
-            {/* ... SEÇÕES DE CÔMODO E ESTILO (IGUAL AO SEU CÓDIGO) ... */}
-            {/* Vou omitir o meio para economizar espaço, mantenha seu código de carrossel aqui */}
 
             {/* 2. Cômodo */}
             <section className="relative">
@@ -238,7 +282,7 @@ export default function DesignPage() {
                   onClick={() => scroll(roomScrollRef, "left")}
                   className="absolute -left-4 top-22 -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-50 z-10 text-gray-600 border border-gray-100 hidden group-hover:flex cursor-pointer"
                 >
-                  <BsChevronLeft size={20} />
+                  <ChevronLeft size={20} />
                 </button>
                 <div
                   ref={roomScrollRef}
@@ -286,7 +330,7 @@ export default function DesignPage() {
                   onClick={() => scroll(roomScrollRef, "right")}
                   className="absolute -right-4 top-22 -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-50 z-10 text-gray-600 border border-gray-100 hidden group-hover:flex cursor-pointer"
                 >
-                  <BsChevronRight size={20} />
+                  <ChevronRight size={20} />
                 </button>
               </div>
             </section>
@@ -306,7 +350,7 @@ export default function DesignPage() {
                   onClick={() => scroll(styleScrollRef, "left")}
                   className="absolute -left-4 top-22 -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-50 z-10 text-gray-600 border border-gray-100 hidden group-hover:flex cursor-pointer"
                 >
-                  <BsChevronLeft size={20} />
+                  <ChevronLeft size={20} />
                 </button>
                 <div
                   ref={styleScrollRef}
@@ -354,7 +398,7 @@ export default function DesignPage() {
                   onClick={() => scroll(styleScrollRef, "right")}
                   className="absolute -right-4 top-22 -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-50 z-10 text-gray-600 border border-gray-100 hidden group-hover:flex cursor-pointer"
                 >
-                  <BsChevronRight size={20} />
+                  <ChevronRight size={20} />
                 </button>
               </div>
             </section>
@@ -373,6 +417,13 @@ export default function DesignPage() {
                       </label>
                       <input
                         type="text"
+                        value={
+                          label === "Altura"
+                            ? dimensions.height
+                            : label === "Largura"
+                            ? dimensions.width
+                            : dimensions.length
+                        }
                         onChange={(e) => {
                           const key =
                             label === "Altura"
@@ -421,44 +472,13 @@ export default function DesignPage() {
               >
                 {isGenerating ? (
                   <>
-                    <svg
-                      className="animate-spin h-6 w-6 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
+                    <Loader2 className="animate-spin h-6 w-6 text-white" />
                     <span>Gerando...</span>
                   </>
                 ) : (
                   <>
                     <span>Gerar Decoração</span>
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
+                    <ImageIcon className="w-6 h-6" />
                   </>
                 )}
               </button>
@@ -481,7 +501,7 @@ export default function DesignPage() {
               onClick={closeModal}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 bg-white p-2 rounded-full shadow-md z-10 cursor-pointer"
             >
-              <BsXLg size={20} />
+              <X size={20} />
             </button>
 
             <div className="p-6 sm:p-8 md:p-10">
@@ -504,9 +524,9 @@ export default function DesignPage() {
                     className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors group cursor-pointer"
                   >
                     {likedResult ? (
-                      <BsHeartFill size={24} className="text-red-500" />
+                      <Heart size={24} className="fill-red-500 text-red-500" />
                     ) : (
-                      <BsHeart
+                      <Heart
                         size={24}
                         className="group-hover:scale-110 transition-transform"
                       />
@@ -518,29 +538,47 @@ export default function DesignPage() {
                 <div className="flex items-center gap-4 w-full md:w-auto">
                   <button
                     onClick={handleRedo}
-                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 border-2 border-[#D95D1E] text-[#D95D1E] font-bold rounded-lg hover:bg-[#D95D1E] hover:text-white transition-colors cursor-pointer"
+                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 border-2 border-[#D95D1E] text-[#D95D1E] font-bold rounded-lg hover:bg-[#D95D1E] hover:text-white transition-colors cursor-pointer text-sm"
                   >
-                    <BsArrowRepeat size={20} />
-                    Refazer
+                    <RotateCcw size={18} /> Refazer
+                  </button>
+
+                  {/* --- BOTÃO SALVAR PREFERÊNCIAS (Novo) --- */}
+                  <button
+                    onClick={handleSavePreferences}
+                    disabled={isSavedPref}
+                    className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-300 font-bold rounded-lg transition-colors cursor-pointer text-sm
+                      ${
+                        isSavedPref
+                          ? "bg-gray-200 text-gray-500 border-transparent cursor-default"
+                          : "bg-white text-gray-600 hover:border-gray-500"
+                      }`}
+                  >
+                    {isSavedPref ? (
+                      <CheckCircle size={18} />
+                    ) : (
+                      <Save size={18} />
+                    )}
+                    {isSavedPref ? "Salvo" : "Salvar Info"}
                   </button>
 
                   {/* --- BOTÃO SALVAR NA GALERIA --- */}
                   <button
                     onClick={handleSaveToGallery}
                     disabled={isSaved}
-                    className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3 font-bold rounded-lg shadow-md transition-all cursor-pointer
-                                ${
-                                  isSaved
-                                    ? "bg-green-500 text-white cursor-default"
-                                    : "bg-[#D95D1E] text-white hover:bg-[#b54a15] hover:-translate-y-0.5"
-                                }`}
+                    className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 font-bold rounded-lg shadow-md transition-all cursor-pointer text-sm
+                        ${
+                          isSaved
+                            ? "bg-green-500 text-white cursor-default"
+                            : "bg-[#D95D1E] text-white hover:bg-[#b54a15] hover:-translate-y-0.5"
+                        }`}
                   >
                     {isSaved ? (
-                      <BsCheckCircleFill size={20} />
+                      <CheckCircle size={18} />
                     ) : (
-                      <BsBookmarkPlusFill size={20} />
+                      <BookmarkPlus size={18} />
                     )}
-                    {isSaved ? "Salvo!" : "Salvar"}
+                    {isSaved ? "Salvo na Galeria" : "Salvar Imagem"}
                   </button>
                 </div>
               </div>

@@ -18,6 +18,7 @@ export default function Header() {
       <nav className="flex gap-6 text-sm">
         <Link href="/new-design" className="hover:border-b">Novo Design</Link>
         <Link href="/gallery" className="hover:border-b">Galeria</Link>
+        <Link href="/preferences" className="hover:border-b">Preferências</Link>
         <Link href="/login"><BsPerson size={20} /></Link>
       </nav>
     </header>

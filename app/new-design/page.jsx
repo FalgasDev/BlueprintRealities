@@ -38,9 +38,6 @@ const styles = [
   { id: "classic", label: "Clássico", img: "/classica.png" },
 ];
 
-const RESULT_IMAGE_PLACEHOLDER =
-  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1200&auto=format&fit=crop";
-
 export default function DesignPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -97,10 +94,26 @@ export default function DesignPage() {
 
     setIsGenerating(true);
 
+    if(selectedRoom == "bedroom") {
+      setGeneratedImage("https://i.imgur.com/46eXHyM.jpg")
+    } else if (selectedRoom == "living") {
+      setGeneratedImage("https://i.imgur.com/GzRHG7g.jpg")
+    } else if (selectedRoom == "kitchen") {
+      setGeneratedImage("https://i.imgur.com/5wEFAJY.jpg")
+    } else if (selectedRoom == "laundry") {
+      setGeneratedImage("https://i.imgur.com/2sVk3tS.jpg")
+    } else if (selectedRoom == "bathroom") {
+      setGeneratedImage("https://i.imgur.com/hlJoX74.jpg")
+    } else if (selectedRoom == "office") {
+      setGeneratedImage("https://i.imgur.com/wIRBB05.jpg")
+    } else if (selectedRoom == "balcony") {
+      setGeneratedImage("https://i.imgur.com/fsnS6JO.jpg")
+    } else {
+      setGeneratedImage("https://i.imgur.com/E1EpeWa.jpg")
+    }
+
     setTimeout(() => {
       setIsGenerating(false);
-      // Define a imagem gerada no estado
-      setGeneratedImage(RESULT_IMAGE_PLACEHOLDER);
       setIsModalOpen(true);
       setLikedResult(false);
       setIsSaved(false); // Reseta o status de salvo

@@ -1,4 +1,3 @@
-import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import {
@@ -8,6 +7,7 @@ import {
   FiUploadCloud,
   FiGlobe,
 } from "react-icons/fi";
+import Link from "next/link";
 
 export default function Home() {
   const categories = [
@@ -59,9 +59,11 @@ export default function Home() {
             incríveis para seu lar.
           </p>
 
-          <button className="mt-6 bg-orange-500 hover:bg-orange-600 px-6 py-3 rounded-4xl text-lg font-medium">
-            Começar
-          </button>
+          <Link href="/new-design">
+            <button className="mt-6 bg-orange-500 hover:bg-orange-600 px-6 py-3 rounded-4xl text-lg font-medium cursor-pointer">
+              Começar
+            </button>
+          </Link>
         </div>
       </section>
 

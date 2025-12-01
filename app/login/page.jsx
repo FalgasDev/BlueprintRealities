@@ -2,24 +2,43 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Import para redirecionamento
 import { BsPerson } from "react-icons/bs";
 
 export default function LoginPage() {
+  const router = useRouter(); // Hook de navegação
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log("Login:", { email, password });
-    // Aqui entra sua lógica de autenticação (NextAuth, Firebase, etc)
+
+    // 1. Recuperar usuários do LocalStorage
+    const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
+
+    // 2. Procurar usuário que tenha e-mail E senha iguais aos digitados
+    const validUser = existingUsers.find(
+      (user) => user.email === email && user.password === password
+    );
+
+    if (validUser) {
+      // 3. Sucesso: Opcional - Salvar sessão do usuário logado atual
+      localStorage.setItem("currentUser", JSON.stringify(validUser));
+
+      console.log("Login realizado com sucesso:", validUser);
+
+      // 4. Redirecionar para a nova página
+      router.push("/new-design");
+    } else {
+      // 5. Falha
+      alert("E-mail ou senha incorretos. Tente novamente.");
+    }
   };
 
   return (
-    // Fundo da página (Tom pastel)
     <div className="min-h-screen bg-[#FFF0E6] flex items-center justify-center p-4 font-sans">
-      {/* Card Principal */}
       <div className="bg-[#FFF9F5] w-full max-w-4xl h-[550px] rounded-3xl shadow-xl flex overflow-hidden">
-        {/* Lado Esquerdo - Imagem (Decorada/Mobiliada para Login) */}
+        {/* Lado Esquerdo */}
         <div className="hidden md:block w-1/2 relative">
           <img
             src="/login.png"
@@ -28,9 +47,8 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Lado Direito - Formulário */}
+        {/* Lado Direito */}
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-12 relative">
-          {/* Ícone de Usuário */}
           <div className="mb-6 flex flex-col items-center">
             <div className="w-16 h-16 border-4 border-[#3D312A] rounded-full flex items-center justify-center mb-2">
               <BsPerson size={35} className="text-[#3D312A]" />
@@ -79,7 +97,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Link para Cadastro */}
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-500">
               Não tem uma conta?{" "}
